@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<AnchorPane fx:controller="application.MyController" xmlns:fx="https://www.javafxdeveloper.com">
+
+	<!-- 图片1280*720 -->
+	<ImageView>
+		<Image url="/res/image/js_cg.jpg"/>
+	</ImageView>
+	
+	<HBox alignment="TOP_RIGHT" stylesheets="res/css/application.css" prefWidth="1280">
+		<!-- 先用Button代替ImageView，实际开发会换成图片 -->
+		<Button text="alwaysOnTop" onMouseEntered="#MouseEntered"></Button>
+		<Button text="iconified"></Button>
+		<Button text="fullScreen"></Button>
+		<Button text="close"></Button>	
+	</HBox>
+</AnchorPane>
+
