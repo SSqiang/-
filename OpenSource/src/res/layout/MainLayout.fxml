@@ -15,9 +15,9 @@
 	<HBox alignment="TOP_RIGHT" stylesheets="res/css/application.css" prefWidth="1280">
 		<!-- 先用Button代替ImageView，实际开发会换成图片 -->
 		<Button text="alwaysOnTop" onMouseEntered="#MouseEntered"></Button>
-		<Button text="iconified"></Button>
-		<Button text="fullScreen"></Button>
-		<Button text="close"></Button>	
+		<Button text="iconified" onMouseEntered="#MouseEntered"></Button>
+		<Button text="fullScreen" onMouseEntered="#MouseEntered"></Button>
+		<Button id="close" text="close"></Button>	
 	</HBox>
 </AnchorPane>
 
