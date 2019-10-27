@@ -19,9 +19,12 @@
 组员有：孙成皓，刘宏远，刘宇轩，扈航，郝益炜，沈强望，刘俊佚  
 ## “三.”版权和许可信息
 ## “three.”Copyright and licensing information  
+该项目签署了MIT 授权许可，详情请参阅 LICENSE.md
 
 `GNU General Public License v2.0`
 [许可证](https://github.com/sqw601843873/-/blob/master/LICENSE) 
 ## "四.”联系我们  
-## "four"Contact us  
-
+##“四个”与我们联系  
+[邮箱](www.1036223117@qq.com"邮箱”)   
+## "五."鸣谢  
+[鸣谢](在这里把网址写上去"邮箱”)   
