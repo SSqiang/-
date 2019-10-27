@@ -17,15 +17,5 @@
 ###“2.”The code is written by oneself, and there are references in it.  
 ###“3.”其中的音乐和歌词是爬的  
 ###“3.”The music and lyrics are copy.  
-##“二.”Contribution Guidelines
-Read our Contribution Guidelines before you contribute.
-
-Community Channel
-We're on Gitter! Please join us.
-
-Algorithms
-See our directory.
-
-
-
+##“二.”
 
