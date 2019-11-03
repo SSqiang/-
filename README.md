@@ -24,7 +24,7 @@
 `GNU General Public License v2.0`
 [许可证](https://github.com/sqw601843873/-/blob/master/LICENSE) 
 ## "四.”联系我们  
-## “四个”与我们联系  
-[邮箱](www.1036223117@qq.com"邮箱”)   
+## “four.”us  
+[邮箱](www.1036223117@qq.com)   
 ## "五."鸣谢  
 [鸣谢](https://github.com/jfoenixadmin/JFoenix)   
