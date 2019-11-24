@@ -1,0 +1,4 @@
+OpenSource 
+图片，音乐资源，歌词以及CSS等
+MusicPlayer
+音乐播放器以及其一些功能实现的代码
