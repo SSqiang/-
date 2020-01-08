@@ -1,5 +1,12 @@
 package application;
 
+import java.awt.AWTException;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +16,11 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+
+import com.jfoenix.controls.JFXColorPicker;
+import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.controls.JFXTabPane;
 
 import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
@@ -29,7 +41,11 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -51,6 +67,7 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 /**
 * 代码较乱，并且界面设置与功能杂糅，想获取歌曲的AudioSpectrumListener()【在143行】
+* 会当作一个小功能吧
 * 注：使用jdk1.8.0_191好像背景图片会变小，原因不明
 * @author 龙之山河
 * @version 1.0
@@ -64,6 +81,15 @@ public class Main extends Application {
 	private double vbox_ty=380;
 	private int lrc_n=0;
 	private ParallelTransition pt=new ParallelTransition();
+	JFXColorPicker jcp;
+	Color c=Color.BLACK;
+	Button b1=new Button("上一曲");
+	Button b2=new Button("下一曲");
+	MediaPlayer mp;
+	ArrayList<Media> me;
+	ArrayList<URL> URL;
+	int index=1;
+	Node[] node;
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		//初始化主键,以后会放在fxml中
@@ -72,14 +98,43 @@ public class Main extends Application {
 		Button close=new Button("close");
 		Button alwaysOnTop=new Button("alwaysOnTop");
 		
+		Label minimality=new Label("最小化托盘：");
+		ToggleButton yes=new ToggleButton("是");
+		ToggleButton no=new ToggleButton("否");
+		ToggleGroup group = new ToggleGroup();
+		yes.setToggleGroup(group);
+		no.setToggleGroup(group);
+		no.setSelected(true);
+		
+		
 		URL cssurl=this.getClass().getClassLoader().getResource("res/css/mycss.css");
 		System.out.println(cssurl.toExternalForm());
 		
-		HBox hbox_top=new HBox(iconified,alwaysOnTop,fullScreen,close);
+		HBox hbox_top=new HBox(minimality,yes,no,iconified,alwaysOnTop,fullScreen,close);
 		hbox_top.setAlignment(Pos.TOP_RIGHT);	
 		hbox_top.getStylesheets().add(cssurl.toExternalForm());
 		
+		AnchorPane.setBottomAnchor(b1, 10.0);
+		AnchorPane.setLeftAnchor(b1, 420.0);
 		
+		AnchorPane.setBottomAnchor(b2, 10.0);
+		AnchorPane.setLeftAnchor(b2, 700.0);
+		
+		Media m1=new Media(this.getClass().getClassLoader().getResource("res/music/だんご大家族.mp3").toExternalForm());
+		Media m2=new Media(this.getClass().getClassLoader().getResource("res/music/请你检阅（Cover：70周年｜大阅兵合唱团）.mp3").toExternalForm());
+		Media m3=new Media(this.getClass().getClassLoader().getResource("res/music/风中舞.mp3").toExternalForm());
+		me=new ArrayList<Media>();
+		me.add(m1);
+		me.add(m2);
+		me.add(m3);
+		
+		URL lrcURL1=this.getClass().getClassLoader().getResource("res/lyric/だんご大家族.lrc");
+		URL lrcURL2=this.getClass().getClassLoader().getResource("res/lyric/请你检阅（Cover：70周年｜大阅兵合唱团）.lrc");
+		URL lrcURL3=this.getClass().getClassLoader().getResource("res/lyric/风中舞.lrc");
+		URL=new ArrayList<URL>();
+		URL.add(lrcURL1);
+		URL.add(lrcURL2);
+		URL.add(lrcURL3);
 		
 		
 		URL url=this.getClass().getClassLoader().getResource("res/image/js_cg.jpg");
@@ -95,14 +150,55 @@ public class Main extends Application {
 		
 		
 		
-		AnchorPane ap=new AnchorPane(iv,hbox_top);
+		AnchorPane ap=new AnchorPane(iv,hbox_top,b1,b2);
+		
+		JFXTabPane tabPane=new JFXTabPane();
 		ap.getChildren().addAll(this.getUI(primaryStage,ap));
+		tabPane.getTabs().add(new Tab("音乐", ap));
 		System.out.println(url.toExternalForm());
 		ap.setStyle("-fx-background-color:#ffffff00;"+"-fx-background-radius:20;");
 		
 //		ap.setStyle("-fx-background-image:url("+url.toExternalForm()+")");
 		
-
+		
+		b2.setOnAction(new EventHandler<ActionEvent>() {
+			
+			public void handle(ActionEvent event) {
+				if(index<me.size()-1){
+					index++;
+				}
+				else {
+					index=0;
+				}
+				ap.getChildren().clear();
+				vbox_ty=380;
+				lrc_n=0;
+				System.gc();
+				ap.getChildren().addAll(iv,hbox_top,b1,b2);
+				ap.getChildren().addAll(Main.this.getUI(primaryStage,ap));
+				
+			}
+		});
+		
+		b1.setOnAction(new EventHandler<ActionEvent>() {
+			
+			public void handle(ActionEvent event) {
+				if(index>0){
+					index--;
+				}
+				else {
+					index=me.size()-1;
+				}
+				ap.getChildren().clear();
+				vbox_ty=380;
+				lrc_n=0;
+				System.gc();
+				ap.getChildren().addAll(iv,hbox_top,b1,b2);
+				ap.getChildren().addAll(Main.this.getUI(primaryStage,ap));
+				
+			}
+		});
+		primaryStage.getIcons().add(new Image("/res/image/icon.png"));
 		Scene scene=new Scene(ap,iv.getFitWidth(),iv.getFitHeight());
 		//设置背景舞台透明
 		scene.setFill(Color.TRANSPARENT);
@@ -120,13 +216,13 @@ public class Main extends Application {
 		
 		
 		//拖动窗口
-		scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+		ap.setOnMousePressed(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {
 				dX=event.getScreenX()-primaryStage.getX();
 				dY=event.getScreenY()-primaryStage.getY();
 			}
 		});
-		scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+		ap.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {
 				if (!isFullScreen&&event.getButton()==MouseButton.PRIMARY) {
 					primaryStage.setX(event.getScreenX()-dX);
@@ -153,7 +249,59 @@ public class Main extends Application {
 		});
 		close.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {
-				Platform.exit();			
+				System.out.println(yes.isSelected());
+				
+				if(yes.isSelected()) {				
+					java.awt.Image icon=Toolkit.getDefaultToolkit().getImage("src/res/image/icon.png");
+					String tooltip="MusicPlayer";
+					PopupMenu popup=new PopupMenu();
+					MenuItem item1=new MenuItem("显示");
+					MenuItem item2=new MenuItem("退出");
+					
+					popup.add(item1);
+					popup.add(item2);
+					SystemTray systemTray = SystemTray.getSystemTray();			
+					TrayIcon trayIcon=new TrayIcon(icon, tooltip, popup);
+					try {
+						systemTray.add(trayIcon);
+					} catch (AWTException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
+					}
+					Platform.setImplicitExit(false);
+					primaryStage.hide();
+					
+					item1.addActionListener(new ActionListener() {
+						
+						public void actionPerformed(java.awt.event.ActionEvent e) {
+							Platform.runLater(new Runnable() {
+								
+								public void run() {
+									primaryStage.show();															
+								}
+							});
+							systemTray.remove(trayIcon);								
+						}
+					});
+					item2.addActionListener(new ActionListener() {
+						
+						public void actionPerformed(java.awt.event.ActionEvent e) {
+							Platform.setImplicitExit(true);
+							Platform.runLater(new Runnable() {
+								
+								public void run() {
+									primaryStage.close();															
+								}
+							});
+							systemTray.remove(trayIcon);
+//							Platform.exit();
+						}
+					});
+				}else {
+					Platform.setImplicitExit(true);
+					primaryStage.close();
+//					Platform.exit();	
+				}
 			}
 		});
 		
@@ -251,13 +399,17 @@ public class Main extends Application {
 	 * */
 	private Node[] getUI(Stage primaryStage,AnchorPane ap) {
 		
-		URL murl=this.getClass().getClassLoader().getResource("res/music/だんご大家族.mp3");
-		Media media=new Media(murl.toExternalForm());
-		MediaPlayer mp=new MediaPlayer(media);
+		Media media=me.get(index);
+		mp=new MediaPlayer(media);
 		
 		Button b1=new Button("播放");
 		AnchorPane.setBottomAnchor(b1,10.0);
 		AnchorPane.setLeftAnchor(b1, 600.0);
+		
+		jcp=new JFXColorPicker(Color.BLACK);
+		AnchorPane.setBottomAnchor(jcp,10.0);
+		AnchorPane.setLeftAnchor(jcp, 200.0);
+		
 		
 		ChoiceBox<Double> cb=new ChoiceBox<Double>();
 		//虽然设置的倍数范围是[1.0，8.0]，但倍数过高歌词跟不上（主要是声音过于古怪）
@@ -283,7 +435,7 @@ public class Main extends Application {
 		Slider slider=new Slider(0,1,0.5);
 		slider.setOrientation(Orientation.VERTICAL);
 		
-		Slider slider2=new Slider(0,1,0);
+		JFXSlider slider2=new JFXSlider(0,1,0);
 		mp.setOnReady(new Runnable() {
 			
 			public void run() {
@@ -398,11 +550,12 @@ public class Main extends Application {
 		});
 
 		//必须分层(好像也可以不分)
-		Node[] node=new Node[5];
+		node=new Node[6];
 		node[1]= b1;
 		node[2]= cb;
 		node[3]= slider2;
 		node[4]= vbox;
+		node[5]=jcp;
 		node[0]=this.getLyric(mp,media);
 		slider2.setId("sl");
 		
@@ -437,7 +590,7 @@ public class Main extends Application {
 		AnchorPane.setRightAnchor(ss, 100.0);
 		AnchorPane.setTopAnchor(ss, 100.0);	
 		
-		URL lrcURL=this.getClass().getClassLoader().getResource("res/lyric/だんご大家族.lrc");		
+		URL lrcURL=URL.get(index);		
 		try {
 			//路径需转码
 			File lrcFile=new File(URLDecoder.decode(lrcURL.getFile(), "utf-8"));
@@ -491,11 +644,27 @@ public class Main extends Application {
 			lrc_l.setFill(Color.RED);
 		}
 		
+		jcp.setOnAction(new EventHandler<ActionEvent>() {
+			
+			public void handle(ActionEvent event) {
+				c=jcp.getValue();
+				for (int i = 0; i < vbox.getChildren().size(); i++) {
+					Text t=(Text) vbox.getChildren().get(i);
+					if(t.getTranslateZ()==100) {
+						t.setFill(c);
+					}
+					
+				}
+				
+			}
+		});
+		
 		//推荐这样减小数据精度(因为是0.1秒刷新一次，但是好像歌词太近会造成不明bug)
 		mp.currentTimeProperty().addListener(new ChangeListener<Duration>() {
 
 			public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
 				//快速播放加反复seek会导致歌词Y轴坐标错位和Z轴坐标异常（原因未知，待解决）
+				if(mp.getStatus().equals(javafx.scene.media.MediaPlayer.Status.PLAYING)) {
 				if(pt==null||pt.getStatus().equals(Status.STOPPED)) {
 				//测试
 				if(lrc_n+1<vbox.getChildren().size())
@@ -509,7 +678,9 @@ public class Main extends Application {
 					}
 					pt=toUp(vbox,Duration.millis(d));	
 					lrc_n++;
-					System.out.println("-->"+vbox.getChildren().get(lrc_n));					
+					//测试
+					Text t=(Text) vbox.getChildren().get(lrc_n);
+					System.out.println("-->"+t.getText());					
 				}
 				if ((double)vbox.getChildren().get(lrc_n).getUserData()>newValue.toSeconds()&&lrc_n!=0) {
 					double d=500;
@@ -519,7 +690,10 @@ public class Main extends Application {
 					}
 					pt=toDown(vbox,Duration.millis(d));
 					lrc_n--;
-					System.out.println("<--"+vbox.getChildren().get(lrc_n));
+					//测试
+					Text t=(Text) vbox.getChildren().get(lrc_n);
+					System.out.println("<--"+t.getText());
+				}
 				}
 				}
 			}
@@ -550,7 +724,7 @@ public class Main extends Application {
 		Text text1=(Text)vbox.getChildren().get(lrc_n+1);
 		text1.setFill(Color.RED);
 		Text text2=(Text)vbox.getChildren().get(lrc_n);
-		text2.setFill(Color.BLACK);
+		text2.setFill(c);
 		
 		
 		pt.getChildren().clear();
@@ -580,7 +754,7 @@ public class Main extends Application {
 		Text text1=(Text)vbox.getChildren().get(lrc_n-1);
 		text1.setFill(Color.RED);
 		Text text2=(Text)vbox.getChildren().get(lrc_n);
-		text2.setFill(Color.BLACK);
+		text2.setFill(c);
 		
 		pt.getChildren().clear();
 		pt.getChildren().addAll(t1,t2,t3);
